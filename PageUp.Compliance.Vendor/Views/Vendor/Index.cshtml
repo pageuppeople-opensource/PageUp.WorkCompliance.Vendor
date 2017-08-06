@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Vendor Integration Workflow";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Vendor Integration Workflow</h2>
+        <p>The purpose of this page is to demonstrate a simple workflow on how compliance solution providers could integrate with PageUp's Work Compliance API to provide a seamless experience for new hires who are required to fill out compliance forms within the PageUp system.</p>
+        <div class="well well-sm">
+            <h4>Before you start,</h4>
+            <p>
+                Ensure that you have the following information from PageUp:
+                <dl>
+                    <dt>Client Id and Client Secret</dt>
+                    <dd>The client id and secret are required to exchange for a temporary access token from PageUp's Identity Server to interact with PageUp's Work Compliance API service. The credentials gives you access for a specific client within PageUp.</dd>
+                    <dt>Data Center</dt>
+                    <dd>The data center that is configured for the client id.</dd>
+                </dl>
+                If you got the information ready, please go to <strong>
+                    <a asp-area="" asp-controller="Vendor" asp-action="Config">config</a>
+                </strong> and set them.
+            </p>
+        </div>
+
+        <div class="panel-group" id="accordion" role="tablist">
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#panel-invitation">
+                            Step 1 - Get Pending Invitations From PageUp WorkCompliance API
+                        </a>
+                    </h3>
+                </div>
+                <div id="panel-invitation" class="panel-collapse collapse in" role="tabpanel">
+                    <div class="panel-body">
+                        <div class="button-section">
+                            <p class="pull-left" style="width: 50%;">
+                                The first step is to get a list of pending invitations from PageUp Work Compliance API so that you could organise the appropriate compliance forms that need to be filled out by the new hire specified in the invitation. <br/><br/>To view the list of invitations and the data fields available in the invitation, click on the <strong>Get Pending Invitations</strong> button.
+                            </p>
+                            <button id="btn-get-pending-invitations"
+                                    type="button"
+                                    class="btn btn-default pull-right"
+                                    data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                                Get Pending Invitations
+                            </button>
+                        </div>
+                        <div id="invitation-data"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#panel-acknowledgement">
+                            Step 2 - Acknowledgement
+                        </a>
+                    </h3>
+                </div>
+                <div id="panel-acknowledgement" class="panel-collapse collapse" role="tabpanel">
+                    <div class="panel-body">
+                        <p>
+                            After getting the invitations from the previous step, you could start processing the invitations using the available data fields in the invitation. For example user provisioning, organizing regulatory forms for the user, sending an email notification to user etc.
+                            <br/><br/>
+                            When the invitation is ready, let PageUp Work Compliance API know that the invitation is <strong>In Progress</strong>.
+                        </p>
+
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Process Invitation</h3>
+                            </div>
+                            <div class="panel-body" id="form-success-update">
+                                <div class="form-group form-inline">
+                                    <label for="success-request-id">Request Id</label>
+                                    <input type="text" class="form-control" id="success-request-id" placeholder="Request Id" required>
+                                    <button type="button"
+                                            id="btn-success-update"
+                                            class="btn btn-success pull-right"
+                                            data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Updating">
+                                        Update Status to <strong>"In Progress"</strong>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <p class="lead">
+                            <strong>OR</strong>
+                        </p>
+                        <p>
+                            Otherwise, let PageUp Work Compliance API know that the invitation has <strong>Failed</strong> with a reason so the user could take appropriate actions to resolve it.
+                        </p>
+                        <div class="panel panel-danger">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Reject Invitation</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group form-inline">
+                                    <label for="fail-request-id">Request Id</label>
+                                    <input type="text" class="form-control" id="fail-request-id" placeholder="Request Id">
+                                    <label for="fail-reason">Reason</label>
+
+                                    <input type="text" class="form-control" id="fail-reason" placeholder="Reason">
+                                    <button type="button"
+                                            id="btn-fail-update"
+                                            class="btn btn-danger pull-right"
+                                            data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Updating">
+                                        Update Status to <strong>"Failed"</strong>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Response</h4>
+                            <div class="well">
+                                <pre id="acknowledge-response">
+                            </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#panel-sso">
+                            Step 3 - PageUp Users to Complete Form
+                        </a>
+                    </h3>
+                </div>
+                <div id="panel-sso" class="panel-collapse collapse" role="tabpanel">
+                    <div class="panel-body">
+                        <p>When the forms are ready, the new hires or relevant users (e.g recruiter, hiring manager) would require to gain access to vendor's platform to take further actions. You can do this by implementing the following:</p>
+                        
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong>Vendor's Landing Page with PageUp SSO</strong></div>
+                            <div class="panel-body">
+                                <p>How this works is the user lands on a page hosted on the vendor's platform and the user is redirected to PageUp's Identity Server to authenticate the user. PageUp's Identity Server then redirects the user back to the vendor's platform and the vendor grant access to the relevent resources for the user.</p>                                
+                                <p>The url to the vendor's landing page could be embedded within PageUp system, so user is able to click on the url and login to vendor's platform seamlessly.</p>
+                                <p>For more information on using PageUp SSO, please go to <a target="_blank" href="https://github.com/PageUpPeopleOrg/PageUp.AuthSamples/blob/master/AuthorizationCodeGrantClient/Readme.md">PageUp Auth Samples</a>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong>Vendor's Sign in Page</strong></div>
+                            <div class="panel-body">
+                                <p>The vendor provides a sign-in page in which the user will login using credential provided by the vendor.</p>
+                                <p>The url to the vendor's sign-in page could be embedded within PageUp system, so user is able to click on the url and login to vendor's platform.</p>
+                                <p>This method should only be use if the vendor is not able to implement PageUp SSO in their workflow.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong>Vendor's Email Notification with Self-Authenticated Landing Page</strong></div>
+                            <div class="panel-body">
+                                <p>Vendor sends an email notification to the users with a timed based url that contains the vendor's authentication token that would seamlessly signs in the user when user clicks on it.</p>
+                            </div>
+                        </div>
+                        
+                        <br/>
+                        <p>Ideally, PageUp would like the vendor to have a landing page and also send out notification to the users so they could login to the vendor's platform via PageUp as well as from their email.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#panel-operational">
+                            Step 4 - Update Operational Status
+                        </a>
+                    </h3>
+                </div>                                
+
+                <div id="panel-operational" class="panel-collapse collapse" role="tabpanel">
+                    <div class="panel-body">
+                        <p>
+                            The last step in vendor's workflow is operational status update. Similar to <strong>Step 2</strong>, when there is status update for the invitation from the vendor, they should let PageUp's Work Compliance API know so the latest status
+                            is reflected in PageUp system.
+                        </p>
+                
+                        <p>For example, when new hire completed a form, a potential status update is <strong>Tax Form Completed</strong> with an optional reason. There is no restriction to what status you can use provided that the status and reason are meaningful to the users.</p>
+                        <hr/>
+                        <div class="form-group form-inline">
+                            <label for="operational-path-request-id">Request Id</label>
+                            <input type="text" class="form-control" id="operational-path-request-id" placeholder="Request Id">
+
+                            <label for="operational-status">Status</label>
+                            <input type="text" class="form-control" id="operational-status" placeholder="Secion 1 Completed">
+
+                            <label for="operational-reason">Reason</label>
+                            <input type="text" class="form-control" id="operational-reason" placeholder="Reason">
+
+                            <button type="button"
+                                    id="btn-operational-update"
+                                    class="btn btn-primary pull-right"
+                                    data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Updating">
+                                Update Status
+                            </button>
+                        </div>
+
+                        <div>
+                            <h4>Response</h4>
+                            <div class="well">
+                                <pre id="operational-response">
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="well well-sm">
+            <p>
+                For more information on how to integrate with our Work Compliance API Service, please go to
+                <a target="_blank" href="https://developers.pageuppeople.com/Api/Onboarding/WorkCompliance">PageUp Developers Portal - Work Compliance</a>.
+            </p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+@using Newtonsoft.Json
+@model List<PageUp.Compliance.Vendor.Core.ComplianceInvitation>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Request Id</th>
+        <th>Employee Id</th>
+        <th>First name</th>
+        <th>Last name</th>
+        <th>Email</th>
+        <th>Created</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var invitation in Model)
+    {
+        <tr>
+            <td>@invitation.RequestId</td>
+            <td>@invitation.EmployeeId</td>
+            <td>@invitation.FirstName</td>
+            <td>@invitation.LastName</td>
+            <td>@invitation.Email</td>
+            <td>@invitation.Created</td>
+            <td>
+                @if (invitation.Statuses.Any())
+                {
+                    <p>@invitation.Statuses.OrderByDescending(x => x.Created).ToList()[0].Status</p>
+                }
+                else
+                {
+                    <p>No status</p>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div>
+    <h4>Response</h4>
+    <div class="well">
+        <pre id="invitation-response" style="height: 380px;">
+@JsonConvert.SerializeObject(Model, Formatting.Indented)
+        </pre>
+    </div>
+</div>

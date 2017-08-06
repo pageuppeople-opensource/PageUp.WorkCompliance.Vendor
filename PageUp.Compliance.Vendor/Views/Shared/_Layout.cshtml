@@ -1,0 +1,221 @@
+﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PUP Compliance</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css" />    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <style>
+        body {
+            padding-top: 50px;
+            padding-bottom: 20px;
+        }
+
+        .navbar-inverse {
+            background-color: #142C52;
+            border-color: #257BA0;
+        }
+
+        .navbar-inverse .navbar-brand {
+            color: #DDF2FB;
+        }
+
+        .navbar-inverse .navbar-nav > li > a {
+            color: #DDF2FB;
+        }
+
+        .panel-primary > .panel-heading {
+            color: #fff;
+            background-color: #257BA0;
+            border-color: #257BA0;
+        }
+
+        /* Wrapping element */
+        /* Set some basic padding to keep content from hitting the edges */
+        .body-content { 
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Set widths on the form inputs since otherwise they're 100% wide */
+        input,
+        select,
+        textarea {
+            max-width: 280px;
+        }
+
+        /* Carousel */
+        .carousel-caption p {
+            font-size: 20px;
+            line-height: 1.4;
+        }
+
+        /* Make .svg files in the carousel display properly in older browsers */
+        .carousel-inner .item img[src$=".svg"] {
+            width: 100%;
+        }
+
+        /* Hide/rearrange for smaller screens */
+        @@media screen and (max-width: 767px) {
+        /* Hide captions */
+        .carousel-caption {
+            display: none;
+        }
+        }
+
+        .button-section {
+            width: 100%;
+            margin-bottom: 10px;
+            height: 35px;
+        }
+    </style>
+    
+    @Html.Raw(JavaScriptSnippet.FullScript)
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/compliance-vendor/" class="navbar-brand">PUP Compliance</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/compliance-vendor/">Vendor</a></li>
+                    <li><a asp-area="" asp-controller="Vendor" asp-action="Config">Config</a></li>
+                    <li><a href="https://github.com/PageUpPeopleOrg/PageUp.WorkCompliance.Vendor">Github</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; 2017 - PUP Compliance</p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js" integrity="sha256-ihAoc6M/JPfrIiIeayPE9xjin4UWjsx2mjW/rtmxLM4=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        // Write your Javascript code.
+        var workCompliance = {
+            init: function () {
+                var that = this;
+                $("#btn-get-pending-invitations").click(function () {
+                    var $this = $(this);
+                    $this.button('loading');                    
+                    $.ajax({
+                        type: 'GET',
+                        url: 'getpendinginvitations',
+                        data: { },
+                        success: function (data) {
+                            $('#invitation-data').html(data);
+                        },
+                        error: function (jqXHR, status, err) {
+                            alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
+                        },
+                        complete: function(data) {
+                            $this.button('reset');
+                        }
+                    });
+                });
+
+                $("#btn-get-invitations").click(function () {
+                    var $this = $(this);
+                    $this.button('loading');
+                    var status = $("#query-status").val();
+                    if (!status) {
+                        status = "pending";
+                    }
+                    $.ajax({
+                        type: 'GET',
+                        url: 'GetInvitationsByStatus?status=' + status,
+                        data: {},
+                        success: function (data) {
+                            $('#invitation-query-data').html(data);
+                        },
+                        error: function (jqXHR, status, err) {
+                            alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
+                        },
+                        complete: function (data) {
+                            $this.button('reset');
+                        }
+                    });
+                });
+
+                $("#btn-success-update").click(function () {
+                    var $this = $(this);
+                    that.updateCompliance($this, $("#success-request-id").val(), "In Progress", "", $("#acknowledge-response"));
+                });
+
+                $("#btn-fail-update").click(function () {
+                    var $this = $(this);
+                    that.updateCompliance($this, $("#fail-request-id").val(), "Failed", $("#fail-reason").val(), $("#acknowledge-response"));
+                });
+
+                $("#btn-operational-update").click(function () {
+                    var $this = $(this);  
+                    that.updateCompliance($this, $("#operational-path-request-id").val(), $("#operational-status").val(), $("#operational-reason").val(), $("#operational-response"));
+                });
+            },
+
+            updateCompliance: function (that, requestId, status, notes, responseElement) {
+                var message;
+                if (!requestId) {
+                    message = "request id";
+                }        
+                if (!status) {
+                    if (message) {
+                        message += " and status are required";
+                        alert(message);
+                        return;
+                    } else {
+                        message = "status";
+                    }
+                }
+                if (message) {
+                    message += " is required";
+                    alert(message);
+                    return;
+                }
+                that.button('loading');
+                $.ajax({
+                    type: 'POST',
+                    url: 'UpdateInvitationStatus',
+                    data: {
+                        requestId : requestId,
+                        status: status,
+                        notes: notes
+                    },
+                    success: function (data) {
+                        responseElement.html(JSON.stringify(data, null, "\t"));
+                    },
+                    error: function (jqXHR, status, err) {
+                        alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.statusText);
+                    },
+                    complete: function(data) {
+                        that.button('reset');
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function () {            
+            var wc = Object.create(workCompliance);
+            wc.init();
+        });
+
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
