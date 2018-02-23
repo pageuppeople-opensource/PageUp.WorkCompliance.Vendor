@@ -1,10 +1,12 @@
+@using System.Collections.Generic
+@using System.Linq
 @using Newtonsoft.Json
 @model List<PageUp.Compliance.Vendor.Core.ComplianceInvitation>
 
 <table class="table">
     <thead>
     <tr>
-        <th>Request Id</th>
+        <th>Invitation Id</th>
         <th>Employee Id</th>
         <th>First name</th>
         <th>Last name</th>
@@ -17,7 +19,7 @@
     @foreach (var invitation in Model)
     {
         <tr>
-            <td>@invitation.RequestId</td>
+            <td>@invitation.InvitationId</td>
             <td>@invitation.EmployeeId</td>
             <td>@invitation.FirstName</td>
             <td>@invitation.LastName</td>

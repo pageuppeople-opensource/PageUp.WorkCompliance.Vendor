@@ -75,15 +75,15 @@ namespace PageUp.Compliance.Service.Controllers
 
         [HttpPost]
         [Route("UpdateInvitationStatus")]
-        public IActionResult UpdateInvitationStatus(string requestId, string status, string notes)
+        public IActionResult UpdateInvitationStatus(string invitationId, string status, string notes)
         {
             var accessToken = GetToken();
 
             using (var client = new HttpClient())
             {
-                var apiUrl = $"https://integration.{HttpContext.Session.GetString("DataCenter")}.pageuppeople.com";
+                var apiUrl = $"https://api.{HttpContext.Session.GetString("DataCenter")}.pageuppeople.com";
                 client.BaseAddress = new Uri(apiUrl);
-                var endpoint = $"/compliance/requests/{requestId}/statuses";
+                var endpoint = $"/v3/{HttpContext.Session.GetString("InstanceId")}/workcompliance/invitations/{invitationId}/statuses";
 
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue(accessToken.TokenType, accessToken.ProtectedTicket);
@@ -91,7 +91,7 @@ namespace PageUp.Compliance.Service.Controllers
                 var payload = new
                 {
                     Status = status,
-                    Notes = new List<string> {notes}
+                    Notes = notes == null ? null : new List<string> {notes}
                 };
 
                 var response = client.PutAsync(endpoint,
@@ -117,6 +117,7 @@ namespace PageUp.Compliance.Service.Controllers
             HttpContext.Session.SetString("ClientId", config.ClientId ?? "");
             HttpContext.Session.SetString("ClientSecret", config.ClientSecret ?? "");
             HttpContext.Session.SetString("DataCenter", config.DataCenter ?? "");
+            HttpContext.Session.SetString("InstanceId", config.InstanceId ?? "");
 
             return RedirectToAction("Config");
         }
@@ -127,9 +128,9 @@ namespace PageUp.Compliance.Service.Controllers
             if (accessToken == null) return null;
             using (var client = new HttpClient())
             {
-                var apiUrl = $"https://integration.{HttpContext.Session.GetString("DataCenter")}.pageuppeople.com";
+                var apiUrl = $"https://api.{HttpContext.Session.GetString("DataCenter")}.pageuppeople.com";
                 client.BaseAddress = new Uri(apiUrl);
-                var endpoint = $"compliance/requests/?status={status}";
+                var endpoint = $"/v3/{HttpContext.Session.GetString("InstanceId")}/workcompliance/invitations/?status={status}";
 
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue(accessToken.TokenType, accessToken.ProtectedTicket);
@@ -142,7 +143,7 @@ namespace PageUp.Compliance.Service.Controllers
 
                 var exception =
                     new Exception(
-                        $"Error retrieving compliance request. Status code:{response.StatusCode} with error message: {response.RequestMessage}.");
+                        $"Error retrieving compliance invitation. Status code:{response.StatusCode} with error message: {response.RequestMessage}.");
                 throw exception;
             }
         }
