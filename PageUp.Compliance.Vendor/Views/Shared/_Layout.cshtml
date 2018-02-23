@@ -122,7 +122,7 @@
                             $('#invitation-data').html(data);
                         },
                         error: function (jqXHR, status, err) {
-                            alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
+                            alert('Invitation Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
                         },
                         complete: function(data) {
                             $this.button('reset');
@@ -145,7 +145,7 @@
                             $('#invitation-query-data').html(data);
                         },
                         error: function (jqXHR, status, err) {
-                            alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
+                            alert('Invitation Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.responseText);
                         },
                         complete: function (data) {
                             $this.button('reset');
@@ -155,24 +155,24 @@
 
                 $("#btn-success-update").click(function () {
                     var $this = $(this);
-                    that.updateCompliance($this, $("#success-request-id").val(), "In Progress", "", $("#acknowledge-response"));
+                    that.updateCompliance($this, $("#success-invitation-id").val(), "In Progress", "", $("#acknowledge-response"));
                 });
 
                 $("#btn-fail-update").click(function () {
                     var $this = $(this);
-                    that.updateCompliance($this, $("#fail-request-id").val(), "Failed", $("#fail-reason").val(), $("#acknowledge-response"));
+                    that.updateCompliance($this, $("#fail-invitation-id").val(), "Failed", $("#fail-reason").val(), $("#acknowledge-response"));
                 });
 
                 $("#btn-operational-update").click(function () {
                     var $this = $(this);  
-                    that.updateCompliance($this, $("#operational-path-request-id").val(), $("#operational-status").val(), $("#operational-reason").val(), $("#operational-response"));
+                    that.updateCompliance($this, $("#operational-path-invitation-id").val(), $("#operational-status").val(), $("#operational-reason").val(), $("#operational-response"));
                 });
             },
 
-            updateCompliance: function (that, requestId, status, notes, responseElement) {
+            updateCompliance: function (that, invitationId, status, notes, responseElement) {
                 var message;
-                if (!requestId) {
-                    message = "request id";
+                if (!invitationId) {
+                    message = "invitation id";
                 }        
                 if (!status) {
                     if (message) {
@@ -193,7 +193,7 @@
                     type: 'POST',
                     url: 'UpdateInvitationStatus',
                     data: {
-                        requestId : requestId,
+                        invitationId : invitationId,
                         status: status,
                         notes: notes
                     },
@@ -201,7 +201,7 @@
                         responseElement.html(JSON.stringify(data, null, "\t"));
                     },
                     error: function (jqXHR, status, err) {
-                        alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.statusText);
+                        alert('Invitation Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.statusText);
                     },
                     complete: function(data) {
                         that.button('reset');
